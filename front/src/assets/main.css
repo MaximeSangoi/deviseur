@@ -1,0 +1,19 @@
+body {
+  background: rgb(var(--v-theme-background));
+}
+
+#app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0rem 2rem 6rem 2rem;
+  font-weight: normal; 
+}
+
+@font-face {
+  font-family: Slabo;
+  src: url(Slabo13px-Regular.ttf);
+}
+
+
+
+

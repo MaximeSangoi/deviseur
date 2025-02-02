@@ -1,0 +1,31 @@
+{
+  "name": "deviseur",
+  "version": "0.0.1",
+  "description": "Génération de facture et devis",
+  "main": "app.js",
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ilovepdf/ilovepdf-nodejs": "^0.3.0",
+    "axios": "^1.7.9",
+    "body-parser": "^2.0.2",
+    "cors": "^2.8.5",
+    "docxtemplater": "^3.55.9",
+    "express": "^5.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "luxon": "^3.5.0",
+    "pdf-parse": "^1.1.1",
+    "pizzip": "^3.1.7"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^22.13.0",
+    "@types/pdf-parse": "^1.1.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
