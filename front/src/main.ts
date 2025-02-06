@@ -21,18 +21,6 @@ const vuetify = createVuetify({
         themes: {
             custom: {
                 dark: false,
-                // colors: {
-                //     primary: '#E64A19',
-                //     'primary-darken-1': '#c85200',
-                //     secondary: '#366785',
-                //     'background': '#CCCCCC',
-                //     //'background': '#263238',
-                //     surface: '#6b8ea4',
-                //     'surface-bright': '#c85200',
-                //     'surface-light': '#c85200',
-                //     'surface-variant': '#c85200',
-                //     'on-surface-variant': '#EEEEEE',
-                // },
                 colors: {
                     primary: '#818C78',
                     'primary-darken-1': '#676F60',

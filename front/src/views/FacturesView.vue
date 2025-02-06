@@ -46,7 +46,7 @@ const generatePDF = async (monthIndex: number, daysWorked: number) => {
       el.remove()
       await getFactures()
       generateFactureLoading.value = false
-    } catch (err) {
+    } catch {
       generateFactureLoading.value = false
     }
   }
@@ -65,7 +65,7 @@ const getFactures = async () => {
     const lastFactureDate = new Date(lastFacture.date!)
     generateMonthIndex.value = (date.getNextMonth(lastFactureDate) as Date).getMonth() + 1
     timelineLoading.value = false
-  } catch (e) {
+  } catch {
     timelineError.value = true
     timelineLoading.value = false
   }

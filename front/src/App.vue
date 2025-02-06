@@ -104,7 +104,7 @@ const setEnvVar = (folderPath: string) => {
                   variant="text"
                 >
                   <v-treeview disabled :items="items" item-value="id" open-all>
-                    <template v-slot:prepend="{ item, isOpen }">
+                    <template v-slot:prepend="{ item }">
                       <v-icon v-if="!item.file"> mdi-folder-open </v-icon>
                       <v-icon v-else> {{ 'mdi-' + item.file }} </v-icon>
                     </template>
