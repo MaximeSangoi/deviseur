@@ -8,13 +8,16 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 import { fr } from 'vuetify/locale';
-
+import { VSnackbarQueue } from 'vuetify/labs/VSnackbarQueue'
 
 import App from './App.vue'
 import router from './router'
 
 const vuetify = createVuetify({
-    components,
+    components: {
+        ...components,
+        VSnackbarQueue
+    },
     directives,
     theme: {
         defaultTheme: 'custom',

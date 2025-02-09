@@ -72,7 +72,7 @@ const direction = computed(() => {
     side="end"
     density="default"
     dot-color="secondary"
-    class="mt-4"
+    class="pt-4"
   >
     <v-timeline-item size="15">
       <template v-slot:opposite>

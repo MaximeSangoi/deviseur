@@ -70,6 +70,7 @@ watchEffect(() => (monthIndex.value = props.monthIndex))
           <v-btn color="primary" variant="tonal" density="default">Charger plus...</v-btn>
         </template>
       </v-timeline-item>
+
       <v-timeline-item
         v-for="facture in props.factures"
         :key="facture.month!"

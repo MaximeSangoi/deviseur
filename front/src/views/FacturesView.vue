@@ -1,74 +1,48 @@
 <script setup lang="ts">
-import { ref, onMounted, type Ref } from 'vue'
-import { useDate } from 'vuetify'
-import api from '../service/api'
-import type { Facture } from '@/models/facture'
+import { onMounted } from 'vue'
 import factureList from '@/components/factures/facture-list.vue'
+import { useGlobalStore } from '../store/global'
+import { useInvoiceStore } from '../store/invoice'
+import { storeToRefs } from 'pinia'
+import { AppErrors } from '@/models/appErrors'
 
-const date = useDate()
-const factures: Ref<Facture[]> = ref([])
-const generateMonthIndex: Ref<number> = ref(1)
-const generateDaysWorked: Ref<number> = ref(20)
-const generateFactureLoading: Ref<boolean> = ref(false)
-const timelineError: Ref<boolean> = ref(false)
-const timelineLoading: Ref<boolean> = ref(false)
+const globalStore = useGlobalStore()
+const invoiceStore = useInvoiceStore()
 
-const generatePDF = async (monthIndex: number, daysWorked: number) => {
-  if (monthIndex != null) {
-    try {
-      generateFactureLoading.value = true
-      const monthIndexString = ('00' + monthIndex).slice(-2)
-      const templateParameters = {
-        numfacture: date.getYear(new Date()) + monthIndexString + '-FINZZLEDIGITAL-0001',
-        today: date.format(new Date(), 'fullDate'),
-        days: daysWorked,
-        ht: daysWorked * 475,
-        tva: daysWorked * 475 * 0.2,
-        month: 'Janvier',
-        ttc: daysWorked * 475 * 1.2,
-        monthend: '31/02/2025',
-      }
-      const file = await api.post(
-        '/generate',
-        {
-          templateParameters,
-          monthIndex: monthIndexString,
-        },
-        {
-          responseType: 'blob',
-        },
-      )
-      const el = document.createElement('a')
-      el.href = URL.createObjectURL(file.data)
-      el.download = templateParameters.numfacture
-      document.body.appendChild(el)
-      el.click()
-      el.remove()
-      await getFactures()
-      generateFactureLoading.value = false
-    } catch {
-      generateFactureLoading.value = false
-    }
-  }
+const {
+  invoices,
+  timelineError,
+  timelineLoading,
+  generateMonthIndex,
+  generateDaysWorked,
+  generateFactureLoading,
+} = storeToRefs(invoiceStore)
+const { generatePDF, getInvoices } = invoiceStore
+
+const generate = (monthIndex: number, daysWorked: number) => {
+  generatePDF(monthIndex, daysWorked).catch((e) => {
+    invoiceStore.setGenerateLoading(false)
+    invoiceStore.setGenerateError(true)
+    globalStore.addError(
+      new AppErrors({
+        name: 'Erreur lors de la génération de la facture',
+        message: e.message,
+      }),
+    )
+  })
 }
 
-const getFactures = async () => {
-  try {
-    timelineLoading.value = true
-    const lastFactures = (await api.get('/factures')).data.map((facture: Facture) => ({
-      ...facture,
-      month: date.format(facture.date, 'month').toUpperCase(),
-    }))
-
-    factures.value = lastFactures
-    const lastFacture = factures.value[factures.value.length - 1]
-    const lastFactureDate = new Date(lastFacture.date!)
-    generateMonthIndex.value = (date.getNextMonth(lastFactureDate) as Date).getMonth() + 1
-    timelineLoading.value = false
-  } catch {
-    timelineError.value = true
-    timelineLoading.value = false
-  }
+const getFactures = () => {
+  getInvoices().catch((e) => {
+    invoiceStore.setLoading(false)
+    invoiceStore.setError(true)
+    globalStore.addError(
+      new AppErrors({
+        name: 'Erreur lors de la récupération des factures',
+        message: e.message,
+      }),
+    )
+  })
 }
 
 const downloadPDF = (filename: string) => {
@@ -76,28 +50,29 @@ const downloadPDF = (filename: string) => {
 }
 
 onMounted(() => {
-  getFactures().catch()
+  getFactures()
 })
 </script>
 
 <template>
   <main class="mx-auto">
-    <div class="d-flex justify-center">
+    <!-- <div class="d-flex justify-center">
       <v-sheet color="secondary" height="56px" class="w-100"></v-sheet>
-    </div>
+    </div> -->
 
     <factureList
       :timelineError="timelineError"
       :timelineLoading="timelineLoading"
-      :factures="factures"
+      :factures="invoices"
       :monthIndex="generateMonthIndex"
       :daysWorked="generateDaysWorked"
       :loading="generateFactureLoading"
       @onDownloadPDF="downloadPDF"
-      @onGeneratePDF="generatePDF"
+      @onGeneratePDF="generate"
     ></factureList>
 
     <v-divider></v-divider>
+
     <v-card tile color="background" elevation="0" class="pa-9">
       <v-row align-content="space-around" class="ga-4">
         <v-card
@@ -118,6 +93,7 @@ onMounted(() => {
             link
           ></v-list-item>
         </v-card>
+
         <v-card class="mx-auto" color="" title="Côté comptable" width="300">
           <template v-slot:prepend>
             <v-icon color="secondary" icon="mdi-bank"></v-icon>

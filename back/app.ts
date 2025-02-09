@@ -8,6 +8,7 @@ import ILovePDFApi from '@ilovepdf/ilovepdf-nodejs'
 import ILovePDFFile from '@ilovepdf/ilovepdf-nodejs/ILovePDFFile.js'
 import { DateTime } from 'luxon';
 import { Facture } from './models/facture';
+import { AxiosError } from 'axios';
 
 const app = express()
 app.use(cors())
@@ -18,13 +19,10 @@ app.post('/generate', async (req, res) => {
     const clientFolder = process.env.CLIENT_FOLDER as string;
     const pathToTemplateFile = path.resolve(clientFolder, "templates", "Facture-template.docx")
     await template.replaceInTemplate(pathToTemplateFile, "Facture-template-remplie.docx", req.body.templateParameters);
-    //const instance = new ILovePDFApi('project_public_cd408e0217f04ced824fb2a04131f600_WM-eX5de7b7825d2ff0331b888f9200901b5c', 'secret_key_cdc4000c41b192ed9da68f430e8bcc2c_-Jbm1d81c80b530258941e38e144326b80460');
     const instance = new ILovePDFApi(process.env.ILOVEAPI_PUBLIC as string, process.env.ILOVEAPI_SECRET as string);
 
     const task = instance.newTask('officepdf');
     try{
-
-    
         await task.start();
         const file = new ILovePDFFile(path.resolve(clientFolder, "templates", "Facture-template-remplie.docx"))
         await task.addFile(file);
@@ -46,8 +44,13 @@ app.post('/generate', async (req, res) => {
 
         res.download(filepath, filename, (error) => console.error(error ?? 'no error'));
     } catch (error) {
-        console.error(error)
-        throw "Impossible de générer le PDF"
+        if (error instanceof AxiosError) {
+            console.error(error.response?.data);
+            throw new Error("Impossible de générer le PDF : \n\n" + error?.response?.data?.message);
+        } else {
+            console.error(error)
+            throw new Error("Impossible de générer le PDF : \n\n" + error);
+        }
     } 
 });
 
