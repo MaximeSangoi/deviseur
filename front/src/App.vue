@@ -11,13 +11,12 @@ const globalStore = useGlobalStore()
 
 const { appErrors } = storeToRefs(globalStore)
 
-const snackbarMessages: Ref<string[]> = ref([])
+const snackbarMessage: Ref<string> = ref('')
+const showSnackbar: Ref<boolean> = ref(false)
 
 watch(appErrors.value, (newValue) => {
-  console.log(newValue)
-  snackbarMessages.value = snackbarMessages.value.concat(
-    newValue.map((error) => error.name) as string[],
-  )
+  showSnackbar.value = true
+  snackbarMessage.value = newValue[0].name as string
 })
 const currentRoute: Ref<number> = computed(() => {
   switch (route.path) {
@@ -73,28 +72,28 @@ const setEnvVar = (folderPath: string) => {
 
 <template>
   <v-sheet height="56" width="100vw" class="top-0 left-0 position-fixed top-bar" elevation="2">
-    <div class="w-50 h-100 mx-auto d-flex align-end justify-end"></div>
+    <div class="w-50 h-100 mx-auto d-flex align-end justify-end ga-2">
+      <v-btn
+        color="primary"
+        icon="mdi-cog"
+        size="small"
+        style="top: 25px"
+        @click="dialog = true"
+      ></v-btn>
+    </div>
   </v-sheet>
   <div class="container">
-    <v-btn id="#menu">test</v-btn>
-    <v-menu activator="#menu">
-      <v-list>
-        <v-list-item>
-          <v-list-item-title @click="dialog = true">test</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
     <RouterView />
   </div>
   <v-layout>
-    <v-bottom-navigation color="primary" :model-value="currentRoute" elevation="3">
+    <v-bottom-navigation color="secondary" :model-value="currentRoute" elevation="3">
       <v-btn to="/factures" selected-class="activeButton">
         <v-icon>mdi-cash</v-icon>
         Factures
       </v-btn>
 
       <v-btn :disabled="true" elevation="3">
-        <v-icon icon="mdi-cash-register" size="x-large"></v-icon>
+        <v-icon icon="mdi-sheep"></v-icon>
       </v-btn>
 
       <v-btn to="/devis" selected-class="activeButton">
@@ -103,7 +102,12 @@ const setEnvVar = (folderPath: string) => {
       </v-btn>
     </v-bottom-navigation>
 
-    <v-snackbar-queue v-model="snackbarMessages" color="primary" variant="flat"></v-snackbar-queue>
+    <v-snackbar v-model="showSnackbar" color="primary" variant="flat">
+      {{ snackbarMessage }}
+      <template v-slot:actions>
+        <v-btn variant="text" icon="mdi-close" size="small" @click="showSnackbar = false"> </v-btn>
+      </template>
+    </v-snackbar>
   </v-layout>
 
   <v-dialog v-model="dialog" max-width="800" transition="dialog-bottom-transition">
@@ -146,7 +150,7 @@ const setEnvVar = (folderPath: string) => {
   </v-dialog>
 </template>
 
-<style scoped>
+<style>
 .top-bar {
   z-index: 1000 !important;
 }
@@ -155,48 +159,26 @@ const setEnvVar = (folderPath: string) => {
   margin-top: 56px;
 }
 
-.fixed-container {
-  pointer-events: none;
-  z-index: 1005 !important;
-  bottom: 0px;
-  left: 0px;
-  width: 100%;
-  position: fixed;
-  justify-content: center;
-  height: 56px;
-  line-height: 1.5;
-}
-
-.fab-container {
-  justify-content: end;
-  align-items: flex-start;
-  min-width: 390px;
-}
-
-.v-fab {
-  flex: none !important;
-}
-
-.activeButton {
-  background-color: rgb(var(--v-theme-secondary));
-  color: rgb(var(--v-theme-on-surface-variant)) !important;
-}
-
 .v-bottom-navigation {
   overflow: initial;
 }
 
 .v-btn--disabled {
   opacity: 1 !important;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-secondary));
   border-radius: 20px 20px 0 0 !important;
   background-color: rgb(var(--v-theme-surface)) !important;
   height: 80px !important;
   top: -15px;
   width: 100px !important;
+  font-size: 1.6rem !important;
 }
 
 .v-treeview {
   background-color: transparent;
+}
+
+.v-snackbar__wrapper {
+  top: -4px !important;
 }
 </style>

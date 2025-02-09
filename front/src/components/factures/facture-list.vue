@@ -199,7 +199,7 @@ watchEffect(() => (monthIndex.value = props.monthIndex))
   </div>
 </template>
 
-<style scoped>
+<style>
 .v-timeline {
   overflow-y: auto;
   max-height: 70vh;
@@ -207,5 +207,9 @@ watchEffect(() => (monthIndex.value = props.monthIndex))
 
 .totalTTC {
   font-family: Slabo;
+}
+
+.mdi-cash-100 {
+  color: rgb(var(--v-theme-primary)) !important;
 }
 </style>
