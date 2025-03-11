@@ -5,6 +5,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/template',
+      name: 'template',
+      component: () => import('../views/TemplateView.vue'),
+    },
+    {
       path: '/factures',
       name: 'factures',
       component: FacturesView,
@@ -17,6 +22,11 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       redirect: 'factures'
+    },
+    {
+      path: '/compta',
+      name: 'compta',
+      component: () => import('../views/ComptaView.vue'),
     }
   ],
 })

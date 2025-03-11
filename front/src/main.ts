@@ -13,6 +13,20 @@ import { VSnackbarQueue } from 'vuetify/labs/VSnackbarQueue'
 import App from './App.vue'
 import router from './router'
 
+const themePerso = {
+    "dark": false,
+    "colors": {
+      "background": "#F4F8FC",
+      "primary": "#085880",
+      "surface": "#001961",
+      "secondary": "#B6A227",
+      "error": "#CE0F32",
+      "info": "#1B73B9",
+      "success": "#1C7B20",
+      "warning": "#AF6A13"
+    }
+  };
+
 const vuetify = createVuetify({
     components: {
         ...components,
@@ -20,22 +34,9 @@ const vuetify = createVuetify({
     },
     directives,
     theme: {
-        defaultTheme: 'custom',
+        defaultTheme: 'themePerso',
         themes: {
-            custom: {
-                dark: false,
-                colors: {
-                    primary: '#818C78',
-                    'primary-darken-1': '#676F60',
-                    secondary: '#5C7285',
-                    'background': '#CCCCCC',
-                    surface: '#E2E0C8',
-                    'surface-bright': '#E2E0C8',
-                    'surface-light': '#607D8B',
-                    'surface-variant': '#607D8B',
-                    'on-surface-variant': '#EEEEEE',
-                },
-            },
+            themePerso: themePerso
         },
     },
     icons: {

@@ -1,5 +1,12 @@
+html {
+  overflow: auto !important;
+}
+
 body {
   background: rgb(var(--v-theme-background));
+  overflow: auto;
+  margin-top: 56px;
+  height: calc(100vh - 56px - 56px);
 }
 
 #app {

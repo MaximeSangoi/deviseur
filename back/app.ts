@@ -9,6 +9,7 @@ import ILovePDFFile from '@ilovepdf/ilovepdf-nodejs/ILovePDFFile.js'
 import { DateTime } from 'luxon';
 import { Facture } from './models/facture';
 import { AxiosError } from 'axios';
+import { parseStringPromise } from 'xml2js';
 
 const app = express()
 app.use(cors())
@@ -57,6 +58,53 @@ app.post('/generate', async (req, res) => {
 app.post('/env', (req, res) => {
     process.env.CLIENT_FOLDER = req.body.clientFolder;
     res.send();
+});
+
+app.post('/templateXML', async (req, res) => {
+    const templateFile = fs.readFileSync(process.env.CLIENT_FOLDER + '/templates/template.xml');
+    const templateJSON = await parseStringPromise(templateFile);
+    const company = templateJSON['rsm:CrossIndustryInvoice'][0]['ram:ApplicableHeaderTradeAgreement'][0]['ram:SellerTradeParty'][0];
+    const client = templateJSON['rsm:CrossIndustryInvoice'][0]['ram:ApplicableHeaderTradeAgreement'][0]['ram:BuyerTradeParty'][0];
+
+    company['ram:Name'][0] = req.body.company.name;
+    company['ram:PostalTradeAddress'][0]['ram:LineOne'][0] = req.body.company.address.split('--')[0];
+    company['ram:PostalTradeAddress'][0]['ram:CityName'][0] = req.body.company.address.split('--')[1];
+    company['ram:SpecifiedTaxRegistration'][0]['ram:ID'][0] = req.body.company.tva;
+    client['ram:PostalTradeAddress'][0]['ram:LineOne'][0] = req.body.client.address.split('--')[0];
+    client['ram:PostalTradeAddress'][0]['ram:CityName'][0] = req.body.client.address.split('--')[1];
+    client['ram:SpecifiedLegalOrganization'][0]['ram:ID'][0] = req.body.client.siret;
+    client['ram:SpecifiedTaxRegistration'][1]['ram:ID'][0] = req.body.client.tva;
+    client['ram:SpecifiedTaxRegistration'][2]['ram:ID'][0] = req.body.client.iban;
+    res.send();
+});
+
+app.get('/templateXML', async (req, res) => {
+    const templateFile = fs.readFileSync(process.env.CLIENT_FOLDER + '/templates/template.xml');
+    const templateJSON = await parseStringPromise(templateFile);
+
+    const company = templateJSON['rsm:CrossIndustryInvoice']['rsm:SupplyChainTradeTransaction'][0]['ram:ApplicableHeaderTradeAgreement'][0]['ram:SellerTradeParty'][0];
+    const client = templateJSON['rsm:CrossIndustryInvoice']['rsm:SupplyChainTradeTransaction'][0]['ram:ApplicableHeaderTradeAgreement'][0]['ram:BuyerTradeParty'][0];
+    const facture = templateJSON['rsm:CrossIndustryInvoice']['rsm:SupplyChainTradeTransaction'][0]['ram:IncludedSupplyChainTradeLineItem'][0];
+    const payment = templateJSON['rsm:CrossIndustryInvoice']['rsm:SupplyChainTradeTransaction'][0]['ram:ApplicableHeaderTradeSettlement'][0]['ram:SpecifiedTradeSettlementPaymentMeans'][0];
+
+    res.send({
+        company: { 
+            address: company['ram:PostalTradeAddress'][0]['ram:LineOne'][0] + ', ' + company['ram:PostalTradeAddress'][0]['ram:PostcodeCode'][0] + ', ' + company['ram:PostalTradeAddress'][0]['ram:CityName'][0],
+            email: company['ram:DefinedTradeContact'][0]['ram:EmailURIUniversalCommunication'][0]['ram:URIID'][0]._,
+            siret: company['ram:SpecifiedLegalOrganization'][0]['ram:ID'][0]._,
+            tva: company['ram:SpecifiedTaxRegistration'][0]['ram:ID'][0]._,
+            iban: payment['ram:PayeePartyCreditorFinancialAccount'][0]['ram:IBANID'][0],
+            bic: payment['ram:PayeeSpecifiedCreditorFinancialInstitution'][0]['ram:BICID'][0]
+        },
+        client: {
+            name: client['ram:Name'][0],
+            address: client['ram:PostalTradeAddress'][0]['ram:LineOne'][0] + ', ' + client['ram:PostalTradeAddress'][0]['ram:PostcodeCode'][0] + ', ' + client['ram:PostalTradeAddress'][0]['ram:CityName'][0],
+            siret: client['ram:SpecifiedLegalOrganization'][0]['ram:ID'][0]._,
+            tjm: facture['ram:SpecifiedLineTradeAgreement'][0]['ram:NetPriceProductTradePrice'][0]['ram:ChargeAmount'][0],
+            contact: client['ram:DefinedTradeContact'][0]['ram:PersonName'][0],
+            email: client['ram:DefinedTradeContact'][0]['ram:EmailURIUniversalCommunication'][0]['ram:URIID'][0]._,
+        },
+    });
 });
 
 app.get('/factures', async (req, res) => {
